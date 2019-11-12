@@ -1,3 +1,4 @@
+#include <nctl/algorithms.h>
 #include "DrawableNode.h"
 #include "RenderQueue.h"
 #include "RenderCommand.h"
@@ -9,6 +10,12 @@ namespace ncine {
 ///////////////////////////////////////////////////////////
 // STATIC DEFINITIONS
 ///////////////////////////////////////////////////////////
+
+const Vector2f DrawableNode::AnchorCenter(0.5f, 0.5f);
+const Vector2f DrawableNode::AnchorBottomLeft(0.0f, 0.0f);
+const Vector2f DrawableNode::AnchorTopLeft(0.0f, 1.0f);
+const Vector2f DrawableNode::AnchorBottomRight(1.0f, 0.0f);
+const Vector2f DrawableNode::AnchorTopRight(1.0f, 1.0f);
 
 unsigned short DrawableNode::imguiLayer_ = LayerBase::HIGHEST - 1024;
 unsigned short DrawableNode::nuklearLayer_ = LayerBase::HIGHEST - 512;
@@ -67,6 +74,13 @@ void DrawableNode::draw(RenderQueue &renderQueue)
 	}
 }
 
+void DrawableNode::setAnchorPoint(float xx, float yy)
+{
+	const float clampedX = nctl::clamp(xx, 0.0f, 1.0f);
+	const float clampedY = nctl::clamp(yy, 0.0f, 1.0f);
+	anchorPoint_.set((clampedX - 0.5f) * width(), (clampedY - 0.5f) * height());
+}
+
 unsigned short DrawableNode::layer() const
 {
 	return renderCommand_->layer();
@@ -84,15 +98,17 @@ void DrawableNode::setLayer(unsigned short layer)
 
 void DrawableNode::updateAabb()
 {
-	float rotatedWidth = absWidth();
-	float rotatedHeight = absHeight();
+	const float width = (absScale().x > 0.0f) ? absWidth() : -absWidth();
+	const float height = (absScale().y > 0.0f) ? absHeight() : -absHeight();
+	float rotatedWidth = width;
+	float rotatedHeight = height;
 
 	if (absRotation_ > MinRotation || absRotation_ < -MinRotation)
 	{
-		float sinRot = sinf(absRotation_ * fDegToRad);
-		float cosRot = cosf(absRotation_ * fDegToRad);
-		rotatedWidth = fabsf(absHeight() * sinRot) + fabsf(absWidth() * cosRot);
-		rotatedHeight = fabsf(absWidth() * sinRot) + fabsf(absHeight() * cosRot);
+		const float sinRot = sinf(absRotation_ * fDegToRad);
+		const float cosRot = cosf(absRotation_ * fDegToRad);
+		rotatedWidth = fabsf(width * cosRot) + fabsf(height * sinRot);
+		rotatedHeight = fabsf(width * sinRot) + fabsf(height * cosRot);
 	}
 
 	aabb_ = Rectf::fromCenterAndSize(absX_, absY_, rotatedWidth, rotatedHeight);
