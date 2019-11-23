@@ -159,13 +159,15 @@ void AndroidApplication::processCommand(struct android_app *state, int32_t cmd)
 			LOGI("APP_CMD_START event received");
 			break;
 		case APP_CMD_RESUME:
-			LOGW("APP_CMD_RESUME event received (not handled)");
+			LOGW("APP_CMD_RESUME event received");
+			theAndroidApplication().resume();
 			break;
 		case APP_CMD_SAVE_STATE:
 			LOGW("APP_CMD_SAVE_STATE event received (not handled)");
 			break;
 		case APP_CMD_PAUSE:
-			LOGW("APP_CMD_PAUSE event received (not handled)");
+			LOGW("APP_CMD_PAUSE event received");
+			theAndroidApplication().suspend();
 			break;
 		case APP_CMD_STOP:
 			LOGW("APP_CMD_STOP event received (not handled)");
