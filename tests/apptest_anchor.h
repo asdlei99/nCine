@@ -6,6 +6,7 @@
 #include <nctl/StaticArray.h>
 #include <ncine/Vector2.h>
 #include <ncine/TimeStamp.h>
+#include <ncine/DrawableNode.h>
 
 namespace ncine {
 
@@ -46,6 +47,7 @@ class MyEventHandler :
 		PARTICLE_SYSTEM
 	};
 
+	nc::Colorf background_;
 	int currentType_;
 	nc::Vector2f anchorPoint_;
 	nc::Vector2f position_;
@@ -54,6 +56,7 @@ class MyEventHandler :
 	bool lockScale_;
 	bool flippedX_;
 	bool flippedY_;
+	nc::DrawableNode::BlendingPreset blendingPreset_;
 
 	nctl::StaticArray<nctl::UniquePtr<nc::Texture>, NumTextures> textures_;
 	nctl::StaticArray<nctl::UniquePtr<nc::Sprite>, NumSprites> sprites_;

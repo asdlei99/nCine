@@ -36,6 +36,7 @@ const nc::Vector2f TexelPoints[] = {
 
 const char *TypeLables[] = { "Sprites", "Mesh Sprites", "Particle Systems" };
 const char *AnchorPoints[] = { "Center", "Bottom Left", "Top Left", "Bottom Right", "Top Right" };
+const char *BlendingPresets[] = { "Disabled", "Alpha", "Pre-multiplied Alpha", "Additive", "Multiply" };
 
 }
 
@@ -45,10 +46,12 @@ nc::IAppEventHandler *createAppEventHandler()
 }
 
 MyEventHandler::MyEventHandler()
-    : currentType_(0), anchorPoint_(0.5f, 0.5f),
+    : background_(nc::Colorf::Black),
+      currentType_(0), anchorPoint_(0.5f, 0.5f),
       position_(0.0f, 0.0f), angle_(0.0f),
       scale_(1.0f, 1.0f), lockScale_(true),
-      flippedX_(false), flippedY_(false)
+      flippedX_(false), flippedY_(false),
+      blendingPreset_(nc::DrawableNode::BlendingPreset::ALPHA)
 {
 }
 
@@ -172,6 +175,12 @@ void MyEventHandler::onFrameStart()
 		flippedX_ = false;
 		flippedY_ = false;
 	}
+	static int currentBlendingSelection = 1;
+	if (ImGui::Combo("Blending", &currentBlendingSelection, BlendingPresets, IM_ARRAYSIZE(BlendingPresets)))
+		blendingPreset_ = static_cast<nc::DrawableNode::BlendingPreset>(currentBlendingSelection);
+
+	ImGui::ColorEdit4("Background Color", background_.data(), ImGuiColorEditFlags_NoAlpha);
+	nc::theApplication().gfxDevice().setClearColor(background_);
 	ImGui::Checkbox("Culling", &settings.cullingEnabled);
 	ImGui::SameLine();
 	ImGui::Checkbox("Batching", &settings.batchingEnabled);
@@ -188,6 +197,7 @@ void MyEventHandler::onFrameStart()
 			sprites_[i]->setScale(scale_);
 			sprites_[i]->setFlippedX(flippedX_);
 			sprites_[i]->setFlippedY(flippedY_);
+			sprites_[i]->setBlendingPreset(blendingPreset_);
 		}
 		else if (currentType_ == Type::MESH_SPRITE)
 		{
@@ -198,6 +208,7 @@ void MyEventHandler::onFrameStart()
 			meshSprites_[i]->setScale(scale_);
 			meshSprites_[i]->setFlippedX(flippedX_);
 			meshSprites_[i]->setFlippedY(flippedY_);
+			meshSprites_[i]->setBlendingPreset(blendingPreset_);
 		}
 		else if (currentType_ == Type::PARTICLE_SYSTEM)
 		{
@@ -208,6 +219,7 @@ void MyEventHandler::onFrameStart()
 			sizeAffectors_[i]->setBaseScale(scale_);
 			particleSystems_[i]->setFlippedX(flippedX_);
 			particleSystems_[i]->setFlippedY(flippedY_);
+			particleSystems_[i]->setBlendingPreset(blendingPreset_);
 		}
 
 		sprites_[i]->setEnabled(currentType_ == Type::SPRITE);
